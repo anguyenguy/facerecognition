@@ -40,52 +40,63 @@ class App extends Component {
       input : 'a',
       link : '',
       array : [],
-      state : 'signout'
+      state : 'signout',
+      box0 : {},
+      width:''
     }
   }
 
-  calculateBoxes = (response) => {
-    try{
-      const numberOfFace = response.outputs[0].data.regions.length();
-      console.log(numberOfFace);
-    }catch(err){
-      console.log(err);
-    }
 
+
+  onInputChange = (events) => {
+      this.setState({
+        input : events.target.value
+      });
   }
 
-onInputChange = (events) => {
-    this.setState({
-      input : events.target.value
+
+  onRouteChange = (e, value) => {
+      e.preventDefault();
+      this.setState({
+        state : value
+      });
+  }
+
+  solveRes = (response) =>{
+    const boxes = response.outputs[0].data.regions;
+    const box0  = boxes[0].region_info.bounding_box;
+    console.log(box0);
+    // get size of image 
+    const image = document.getElementById('inputImage');
+    const width = Number(image.width);
+    const height = Number(image.height);
+
+    console.log("width",width);
+    console.log("height",height);
+
+    return({
+        bottom : height - box0.bottom_row*height,
+        left   : box0.left_col*width,
+        right  : width - box0.right_col*width,
+        top    : box0.top_row*height
     });
   }
 
-onRouteChange = (e, value) => {
-    e.preventDefault();
-    this.setState({
-      state : value
-    });
-}
-  
-onClick = () => {
-    this.setState({
-      link : this.state.input
-    });
-    console.log(this.state.link);
-    app.models.predict("a403429f2ddf4b49b307e318f00e528b", this.state.input).then(
-        function(response) {
-          // do something with response
-          console.log(response);
-          this.calculateBoxes(response);
-          console.log("Ddfsd");
-        },
-        function(err) {
-          // there was an error
-          console.log("Error: ", err);
-        }
-      );
-}
-
+  onClick = () => {
+      this.setState({
+        link : this.state.input
+      });
+      console.log(this.state.link);
+      app.models
+        .predict(
+          Clarifai.FACE_DETECT_MODEL,
+          this.state.input)
+        .then(response => {
+            this.setState({box0:this.solveRes(response)});
+            }
+          )
+        .catch(err =>  console.log(err));
+  }
 
   render() {
     if(this.state.state==='signout'){
@@ -110,7 +121,7 @@ onClick = () => {
                 <Logo />
                 <Rank />
                 <ImageLinkForm onInputChange = {this.onInputChange} onClick={this.onClick} />
-                <Facerecognition link = {this.state.link}  array = {this.state.array}/> 
+                <Facerecognition link = {this.state.link} box0 = {this.state.box0}  array = {this.state.array}/> 
             </div>
           </div>
         )
