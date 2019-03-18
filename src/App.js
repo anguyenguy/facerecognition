@@ -8,11 +8,10 @@ import Particles from 'react-particles-js';
 import Facerecognition from './components/Facerecognition/Facerecognition.js';
 import Clarifai from 'clarifai';
 import Signin from './components/Signin/Signin.js';
+import Register from './components/Register/Register.js';
 
 
 const app = new Clarifai.App({apiKey: '2bd1420d3f854515a5d35ba3db53eb0f'});
-
-
 
 
 const particlesOption = {
@@ -32,7 +31,6 @@ const particlesOption = {
               }
           }
       }
-        
 }
 
 class App extends Component {
@@ -62,11 +60,11 @@ onInputChange = (events) => {
     });
   }
 
-onRouteChange = () => {
-    console.log("huhuhu");
-    // this.setState({
-    //   state : value
-    // });
+onRouteChange = (e, value) => {
+    e.preventDefault();
+    this.setState({
+      state : value
+    });
 }
   
 onClick = () => {
@@ -96,25 +94,35 @@ onClick = () => {
               <Particles className='particles'
                      params= {particlesOption}
                     />
-              <Navigation props = {'Register'}/>
+              <Navigation props = {'Register'} onRouteChange = {this.onRouteChange}/>
               <Signin onRouteChange = {this.onRouteChange}/>
           </div>
         )
     }
-    else{
+    else if(this.state.state==='signin'){
         return (
           <div>
              <Particles className='particles'
                    params= {particlesOption}
                   />
-
             <div className="App">
-                <Navigation props = {'Sign Out'}/>
+                <Navigation props = {'Sign Out'} onRouteChange = {this.onRouteChange}/>
                 <Logo />
                 <Rank />
                 <ImageLinkForm onInputChange = {this.onInputChange} onClick={this.onClick} />
                 <Facerecognition link = {this.state.link}  array = {this.state.array}/> 
             </div>
+          </div>
+        )
+      }
+      else {
+        return(
+          <div>
+              <Particles className='particles'
+                     params= {particlesOption}
+                    />
+              <Navigation props = {'Sign In'} onRouteChange = {this.onRouteChange}/>
+              <Register onRouteChange = {this.onRouteChange}/>
           </div>
         )
       }
